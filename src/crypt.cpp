@@ -59,3 +59,28 @@ unsigned char *aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len
     // Return ciphertext buffer.
     return ciphertext;
 }
+
+unsigned char *aes_decrypt(EVP_CIPHER_CTX *d, unsigned char *ciphertext, int *len)
+{
+    // Set max length to length of ciphertext buffer
+    int p_len = *len;
+    int f_len = 0;
+
+    // Allocate p_len bytes for plaintext
+    unsigned char *plaintext = (unsigned char *)malloc(p_len);
+
+    EVP_DecryptInit_ex(d, NULL, NULL, NULL, NULL);
+
+    // Decrypt len number of bytes from ciphertext, write to plaintext. Actual number of bytes written is stored in p_len.
+    EVP_DecryptUpdate(d, plaintext, &p_len, ciphertext, *len);
+
+    // Decrypt the rest of the data (remaining in a partial block). Write to plaintext at position p_len.
+    // Actual number of final bytes written is stored in f_len.
+    EVP_DecryptFinal_ex(d, plaintext + p_len, &f_len);
+
+    // Update lenght of plaintext to the correct amount of bytes.
+    *len = p_len + f_len;
+
+    // Return plaintext buffer.
+    return plaintext;
+}
